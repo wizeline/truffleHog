@@ -29,8 +29,7 @@ ARG BUCKET_NAME=fill-me
 ARG AWS_REGION=us-west-2
 
 COPY ./aws_credentials /root/.aws/credentials
-RUN python3 setup.py install \
-    && ./build_install.sh \
+RUN ./build_install.sh \
     && python3 test_all.py \
     && ./publish_install.sh \
     && rm -rf /root/.aws/credentials
