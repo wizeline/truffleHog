@@ -14,6 +14,7 @@ import os
 import re
 import json
 import stat
+import re
 from git import Repo
 from git import NULL_TREE
 from truffleHogRegexes.regexChecks import regexes
@@ -69,6 +70,12 @@ def str2bool(v):
 
 BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
 HEX_CHARS = "1234567890abcdefABCDEF"
+
+def is_disable(line):
+    """find a comment like # pylint: disable=no-member
+    not-a-secret
+    and send true if exist."""
+    return re.match(r"\s*not-a-secret", line)
 
 def del_rw(action, name, exc):
     os.chmod(name, stat.S_IWRITE)
@@ -160,6 +167,8 @@ def find_entropy(printableDiff, commit_time, branch_name, prev_commit, blob, com
     stringsFound = []
     lines = printableDiff.split("\n")
     for line in lines:
+        if is_disable(line):
+            continue
         for word in line.split():
             base64_strings = get_strings_of_set(word, BASE64_CHARS)
             hex_strings = get_strings_of_set(word, HEX_CHARS)
